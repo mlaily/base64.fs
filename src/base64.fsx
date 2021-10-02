@@ -1,18 +1,18 @@
 open System.Text
 
 /// Decompose a number in numerals according to the desired base (radix).
-let splitNumerals radix (x : int) =
+let splitNumerals radix (x: int) =
     let rec splitNumerals' =
         function
         | head :: tail ->
             if head < radix then head :: tail
             else head % radix :: (splitNumerals' (head / radix :: tail))
         | _ -> failwith "Don't call this function with an empty list!"
-    splitNumerals' [x] |> List.rev
+    splitNumerals' [ x ] |> List.rev
 
 /// Returns the exponentiation result of a list of positional numerals
 /// in the desired base (radix).
-let unsplitNumerals radix (xs : int list) =
+let unsplitNumerals radix (xs: int list) =
     (0, xs |> List.rev |> List.indexed)
     ||> List.fold (fun state (i, x) -> state + x * (pown radix i))
 
@@ -23,7 +23,7 @@ let getCharsetIndexMap =
     >> Map.ofArray
 
 type Pad = | Left | Right
-let padList padType targetSize padValue (list : 'a list) =
+let padList padType targetSize padValue (list: 'a list) =
     if list.Length >= targetSize then list
     else
         let padding = List.init (targetSize - list.Length) (fun _ -> padValue)
@@ -42,7 +42,7 @@ let base64CharsetIndices = getCharsetIndexMap base64Charset
 
 /// Encodes an array of bytes to a base64 string.
 /// (Note we don't bother adding padding chars)
-let base64Encode (bytes : byte array) =
+let base64Encode (bytes: byte array) =
     bytes
     |> List.ofArray
     |> List.collect ( // Make an uninterrupted string of bits from the input bytes:
@@ -57,7 +57,7 @@ let base64Encode (bytes : byte array) =
     |> System.String.Concat
 
 /// Decodes a base64 string into an array of bytes.
-let base64Decode (str : string) =
+let base64Decode (str: string) =
     str.TrimEnd('=').ToCharArray() // Remove trailing padding and split chars
     |> List.ofArray
     |> List.map (fun char ->
@@ -85,4 +85,3 @@ base64Decode "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu"
 System.Convert.FromBase64String("TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu")
 |> Encoding.UTF8.GetString
 |> printf "%A"
-

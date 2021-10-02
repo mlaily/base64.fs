@@ -36,7 +36,7 @@ let encodeBase64 bytes =
     |> List.toArray
     |> System.String.Concat
 
-let decodeBase64 (text : string) = 
+let decodeBase64 (text: string) = 
     if text.Length % 4 <> 0 then [||] else
       let A = [for c in safeCharset -> c]
               |> List.mapi (fun i a -> a, i)

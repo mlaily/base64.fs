@@ -14,10 +14,11 @@ module Base64_Mine =
                 if head < radix then head :: tail
                 else head % radix :: (splitNumerals' (head / radix :: tail))
             | _ -> failwith "Don't call this function with an empty list!"
-        splitNumerals' [x] |> List.rev
+        splitNumerals' [ x ] |> List.rev
 
-    /// Returns the exponentiation result of a list of positional numerals in the desired base (radix).
-    let unsplitNumerals radix (xs : int list) =
+    /// Returns the exponentiation result of a list of positional numerals
+    /// in the desired base (radix).
+    let unsplitNumerals radix (xs: int list) =
         (0, xs |> List.rev |> List.indexed)
         ||> List.fold (fun state (i, x) -> state + x * (pown radix i))
 
@@ -41,19 +42,19 @@ module Base64_Mine =
           [ 'A' .. 'Z' ]
         @ [ 'a' .. 'z' ]
         @ [ '0' .. '9' ]
-        @ [ '+'; '/' ]
+        @ [ '+'; '/'   ]
         |> Array.ofList
     let base64CharsetIndices = getCharsetIndexMap base64Charset
 
     /// Encodes an array of bytes to a base64 string.
-    ///  (Note we don't bother adding padding chars)
+    /// (Note we don't bother adding padding chars)
     let base64Encode (bytes: byte array) =
         bytes
         |> List.ofArray
         |> List.collect ( // Make an uninterrupted string of bits from the input bytes:
             int // Cast bytes to ints
             >> splitNumerals 2 // Convert input bytes to bits (binary)
-            >> padList Left 8 0) // Pad with leading zeros so we have 8 bits for all input octets
+            >> padList Left 8 0) // Pad with zeros so we have 8 bits for all input octets
         |> List.chunkBySize 6 // Split into sextets
         |> List.map (
             padList Right 6 0 // Pad incomplete sextets with trailing zeros
@@ -65,10 +66,12 @@ module Base64_Mine =
     let base64Decode (str: string) =
         str.TrimEnd('=').ToCharArray() // Remove trailing padding and split chars
         |> List.ofArray
-        |> List.map (fun char -> base64CharsetIndices |> Map.find char) // Map chars back to ints
+        |> List.map (fun char ->
+            base64CharsetIndices
+            |> Map.find char) // Map chars back to ints
         |> List.collect ( // Recreate the uninterrupted bit string:
             splitNumerals 2 // Convert ints to binary
-            >> padList Left 6 0) // Pad with leading zeros so we have 6 bits for all input sextets
+            >> padList Left 6 0) // Pad with zeros so we have 6 bits for all input sextets
         |> List.chunkBySize 8 // Regroup octets
         |> List.map (
             unsplitNumerals 2 // Convert binary back to ints
